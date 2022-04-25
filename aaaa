@@ -1,0 +1,986 @@
+-- Decompiled with the Synapse X Luau decompiler.
+
+local v1 = {};
+clawSpecials = {};
+clawSpecials["Fracture Wyvern"] = function(p1)
+	for v2, v3 in pairs(p1:GetDescendants()) do
+		if v3:IsA("BasePart") then
+			v3.Material = Enum.Material.Neon;
+			v3.Color = Color3.fromRGB(0, 170, 145);
+		end;
+	end;
+end;
+local u1 = require(game.ReplicatedStorage.Modules.DismembermentModule);
+function justice(p2, p3)
+	if p2.Character then
+		if p2.Character:FindFirstChild("HumanoidRootPart") then
+			game.ReplicatedStorage.Remotes.Damage:Fire(p3, p2.Character, math.huge, nil, function(p4, p5)
+				u1:Shatter(p4, p5);
+			end, "Fists", false);
+		end;
+	end;
+end;
+function playSound(p6, p7, p8, p9, p10, p11)
+	local v4 = p7:Clone();
+	if p8 == nil then
+		p8 = 1;
+	end;
+	if p9 == nil then
+		p9 = 1;
+	end;
+	v4.PlaybackSpeed = v4.PlaybackSpeed * (p8 * (math.random(95, 105) / 100));
+	v4.Volume = v4.Volume * p9;
+	if p6:FindFirstChild("HumanoidRootPart") then
+		v4.Parent = p6:FindFirstChild("HumanoidRootPart");
+	elseif p6:FindFirstChild("Hitbox") then
+		v4.Parent = p6:FindFirstChild("Hitbox");
+	elseif p6:FindFirstChild("Fin") then
+		v4.Parent = p6:FindFirstChild("Fin");
+	end;
+	v4:Play();
+	game.Debris:AddItem(v4, v4.TimeLength + 1);
+	if p11 == true then
+		table.insert(p10, v4);
+	end;
+	return p10;
+end;
+function encrypt(p12, p13, p14)
+	local l__Name__5 = p12.Name;
+	local v6 = 946;
+	if game.Players:GetPlayerFromCharacter(p12) then
+		v6 = game.Players:GetPlayerFromCharacter(p12).UserId;
+	end;
+	local v7 = 0;
+	local v8 = "";
+	local v9, v10, v11 = tostring(math.cos(game.PlaceVersion + 1 * p14) * math.floor(v6 / string.len(p13.Name) * p13:GetAttribute("ToolVersion")) - math.floor(#game.ReplicatedStorage.Animations:GetChildren() * math.tan(#game.ReplicatedStorage.Classes:GetChildren()))):gmatch(".");
+	while true do
+		local v12 = v9(v10, v11);
+		if v12 then
+
+		else
+			break;
+		end;
+		v11 = v12;
+		local v13 = tonumber(v12);
+		if v13 then
+			v7 = v7 + 1;
+			v8 = v8 .. utf8.char(60 + v7 + v13);
+		end;	
+	end;
+	string.reverse(v8);
+	return v8;
+end;
+local u2 = { "Fists", "Claws", "Assimilate" };
+local u3 = require(game.ReplicatedStorage.Modules.DamageModule);
+function v1.CreateServerWeapon(p15, p16)
+	local v14 = tick();
+	local v15 = require(p16:WaitForChild("WeaponInfo"));
+	if table.find(u2, p16.Name) then
+		p16:SetAttribute("ToolVersion", math.random(11111, 99999));
+	end;
+	local v16 = false;
+	if v15.YieldRagdoll == true then
+		v16 = true;
+	end;
+	local v17 = p16:FindFirstChild("AI_Hit");
+	if v17 == nil then
+		v17 = Instance.new("BindableEvent", p16);
+		v17.Name = "AI_Hit";
+	end;
+	local v18 = p16:FindFirstChild("AI_PlaySound");
+	if v18 == nil then
+		v18 = Instance.new("BindableEvent", p16);
+		v18.Name = "AI_PlaySound";
+	end;
+	local u4 = false;
+	local u5 = nil;
+	local u6 = nil;
+	local u7 = nil;
+	local u8 = nil;
+	local u9 = {};
+	local u10 = nil;
+	local u11 = nil;
+	p16.Equipped:Connect(function()
+		u4 = true;
+		u5 = p16.Parent;
+		u6 = u5:FindFirstChild("Humanoid");
+		u7 = u6:FindFirstChild("Animator");
+		if u7 == nil then
+			u7 = Instance.new("Animator", u6);
+		end;
+		u8 = game.Players:GetPlayerFromCharacter(u5);
+		if v15.EquipSound and v15.EquipSound:IsA("Sound") then
+			u9 = playSound(u5, v15.EquipSound, 1, 1, u9, true);
+		end;
+		if v15.EquipFunction then
+			coroutine.wrap(function()
+				v15.EquipFunction(u5, p16, v15.SpecialEnabled);
+			end)();
+		end;
+		if p16:FindFirstChild("WeaponModel") then
+			if p16.WeaponModel:FindFirstChild("Handle") then
+				p16.WeaponModel.Handle.Weld.Part1 = u5:FindFirstChild("Right Arm");
+			end;
+		elseif p16:FindFirstChild("WeaponModel1") and p16:FindFirstChild("WeaponModel2") then
+			local v19 = u6:GetAttribute("Class");
+			if clawSpecials[v19] then
+				clawSpecials[v19](p16);
+			else
+				for v20, v21 in pairs(p16:GetDescendants()) do
+					if v21:IsA("BasePart") then
+						if v21.Material ~= Enum.Material.SmoothPlastic then
+							v21.Material = Enum.Material.SmoothPlastic;
+						end;
+						if v21.Parent.Name == "WeaponModel1" then
+							v21.Color = u5["Right Arm"].Color;
+						else
+							v21.Color = u5["Left Arm"].Color;
+						end;
+					end;
+				end;
+			end;
+			for v22, v23 in pairs(p16:GetDescendants()) do
+				if v23:IsA("Weld") then
+					if v23.Parent.Parent.Name == "WeaponModel1" then
+						v23.Part1 = u5:FindFirstChild("Right Arm");
+					else
+						v23.Part1 = u5:FindFirstChild("Left Arm");
+					end;
+				end;
+			end;
+		end;
+		if u8 == nil and u4 == true then
+			u10 = u7:LoadAnimation(v15.HoldAnimation);
+			u10:Play(0.25, 1);
+			u11 = u7:LoadAnimation(v15.EquipAnimation);
+			u11:Play(0.25, 2);
+			if v15.KeyframePoints then
+				for v24, v25 in pairs(v15.KeyframePoints) do
+					u11:GetMarkerReachedSignal(v25.Name):Connect(function()
+						v25.Function(u5, p16);
+					end);
+				end;
+			end;
+		end;
+	end);
+	local u12 = false;
+	local u13 = {};
+	p16.Unequipped:Connect(function()
+		u4 = false;
+		if u10 then
+			u10:Stop(0.25);
+		end;
+		if u11 then
+			u11:Stop(0.25);
+		end;
+		if u12 == true then
+			u12 = false;
+		end;
+		if #u13 > 0 then
+			for v26, v27 in pairs(u13) do
+				v27:Disconnect();
+			end;
+		end;
+		if v15.UnequipFunction then
+			coroutine.wrap(function()
+				v15.UnequipFunction(u5, p16, v15.SpecialEnabled);
+			end)();
+		end;
+		if p16:FindFirstChild("WeaponModel") then
+			if p16.WeaponModel:FindFirstChild("Handle") then
+				p16.WeaponModel.Handle.Weld.Part1 = nil;
+			else
+				for v28, v29 in pairs(p16:GetDescendants()) do
+					if v29:IsA("Weld") then
+						v29.Part1 = nil;
+					end;
+				end;
+			end;
+		end;
+		for v30, v31 in pairs(u9) do
+			if v31.Parent then
+				v31:Destroy();
+			end;
+		end;
+	end);
+	local u14 = 0;
+	local function u15(p17)
+		if p17 then
+			for v32, v33 in pairs(p17:GetDescendants()) do
+				if v33.Name == "Weapon" then
+					for v34, v35 in pairs({ Enum.NormalId.Front, Enum.NormalId.Left, Enum.NormalId.Back, Enum.NormalId.Bottom, Enum.NormalId.Right, Enum.NormalId.Top }) do
+						local v36 = Instance.new("Texture", v33);
+						v36.Name = "BloodTexture";
+						v36.Texture = "rbxassetid://6427969040";
+						v36.Face = v35;
+						v36.Transparency = 1;
+						v36.StudsPerTileU = v15.BloodTextureU * math.random(80, 120) / 100;
+						v36.StudsPerTileV = v15.BloodTextureV * math.random(80, 120) / 100;
+						v36.OffsetStudsU = v15.BloodTextureOffsetU * math.random(80, 120) / 100;
+						v36.OffsetStudsV = v15.BloodTextureOffsetV * math.random(80, 120) / 100;
+					end;
+				end;
+			end;
+		end;
+	end;
+	local function u16(p18, p19, p20, p21, p22)
+		if u4 == true and u5.Humanoid.Health > 0 and u5:FindFirstChild("Torso") and u5.Torso.Neck.Enabled == true and (p18 == "Survivor" and p19 ~= "Survivor" and p19 ~= "Machine" or (p18 ~= "Survivor" and (p19 == "Survivor" or p19 == "Machine") or v15.Class == "Survivor" and p19 ~= "Survivor" and game.PlaceVersion == 0)) then
+			if v15.DamageType == 2 then
+				for v37, v38 in pairs(v15.HitSounds) do
+					playSound(p22, v38, 1, 1 / p21);
+				end;
+			elseif v15.AlternateHitSounds then
+				if math.random(1, 1000) == 1000 then
+					playSound(p22, v15.AlternateHitSounds[math.random(1, #v15.AlternateHitSounds)], 1, 1);
+				else
+					playSound(p22, v15.HitSounds[math.random(1, #v15.HitSounds)], 1, 1 / p21);
+				end;
+			else
+				playSound(p22, v15.HitSounds[math.random(1, #v15.HitSounds)], 1, 1 / p21);
+			end;
+			local v39 = p22.Humanoid:GetAttribute("BloodColour");
+			local v40 = v15.LowerDamage + (v15.HigherDamage - v15.LowerDamage) * p20;
+			if u14 == 0 and (p16:FindFirstChild("WeaponModel") or p16:FindFirstChild("WeaponModel1")) then
+				if p16:FindFirstChild("WeaponModel") == nil then
+					u15(p16:FindFirstChild("WeaponModel1"));
+					u15(p16:FindFirstChild("WeaponModel2"));
+				else
+					u15(p16:FindFirstChild("WeaponModel"));
+				end;
+			end;
+			u14 = u14 + v40;
+			if u14 >= 250 and (p16:FindFirstChild("WeaponModel") or p16:FindFirstChild("WeaponModel1")) then
+				if u5:FindFirstChild("ArmBloodPart") == nil and (p16.Name == "Fists" or p16.Name == "Claws") then
+					local v41 = game.ServerStorage.Models.ArmPart:Clone();
+					v41.Size = Vector3.new(1, 1.5, 1);
+					v41.Transparency = 1;
+					v41.Massless = true;
+					v41.Name = "ArmBloodPart";
+					local v42 = v41:Clone();
+					local v43 = Instance.new("Weld", v41);
+					v43.C0 = CFrame.new(0, 0.25, 0);
+					local v44 = v43:Clone();
+					v44.Parent = v42;
+					v43.Part0 = v41;
+					v43.Part1 = u5:FindFirstChild("Right Arm");
+					v44.Part0 = v42;
+					v44.Part1 = u5:FindFirstChild("Left Arm");
+					for v45, v46 in pairs({ v41, v42 }) do
+						local v47 = Instance.new("Texture", v46);
+						v47.Face = Enum.NormalId.Bottom;
+						v47.Texture = "rbxassetid://6427969040";
+						v47.Name = "ArmBloodTexture";
+						v47.Transparency = 1;
+						v47.Color3 = v39;
+						v47.StudsPerTileU = 4;
+						v47.StudsPerTileV = 4;
+						v47.OffsetStudsU = math.random(160, 240) / 100;
+						v47.OffsetStudsV = math.random(160, 240) / 100;
+						for v48, v49 in pairs({ Enum.NormalId.Front, Enum.NormalId.Back, Enum.NormalId.Left, Enum.NormalId.Right }) do
+							local v50 = v47:Clone();
+							v50.Parent = v46;
+							v50.Face = v49;
+							v50.StudsPerTileU = 4;
+							v50.StudsPerTileV = 8;
+							v50.OffsetStudsU = math.random(100, 200) / 100;
+							v50.OffsetStudsV = math.random(180, 220) / 100;
+						end;
+					end;
+					v41.Parent = u5;
+					v42.Parent = u5;
+				end;
+				if p19 ~= "Machine" then
+					for v51, v52 in pairs(u5:GetDescendants()) do
+						if v52:IsA("Texture") and (v52.Name == "BloodTexture" or v52.Name == "ArmBloodTexture" and (p16.Name == "Fists" or p16.Name == "Claws")) then
+							if u14 < 750 then
+								v52.Transparency = 1 - (u14 - 250) / 500;
+							else
+								v52.Transparency = 0;
+							end;
+							if v39 then
+								v52.Color3 = v39;
+							end;
+						end;
+					end;
+				end;
+			end;
+			if v15.DamageType == 2 then
+				u3:ContaminateCharacter(u5, p22, v40, u5:FindFirstChild("Head").Color, u5.Humanoid:GetAttribute("Class"));
+				return;
+			end;
+			game.ReplicatedStorage.Remotes.Damage:Fire(u5, p22, v40, v15.StatusEffect, v15.KillEffect, v16, p16.Name, p20);
+		end;
+	end;
+	local function u17(p23, p24, p25, p26, p27)
+		if u4 == true then
+			if p24 ~= false then
+				u9 = playSound(p24, p25, p26, p27, u9);
+				return;
+			end;
+			if u9 then
+				for v53, v54 in pairs(u9) do
+					if v54 then
+						v54:Destroy();
+					end;
+				end;
+			end;
+		end;
+	end;
+	local u18 = 0;
+	local u19 = v14;
+	local function u20(p28, p29, p30, p31, p32)
+		local v55 = nil;
+		v55 = u5.Humanoid:GetAttribute("Class");
+		if u8 then
+			if p28 ~= u8 then
+				return;
+			end;
+		else
+			u16(v55, p29, p30, p31, p32);
+			return;
+		end;
+		u16(v55, p29, p30, p31, p32);
+	end;
+	p16.Hit.OnServerEvent:Connect(function(p33, p34, p35, p36, p37, p38, p39)
+		if p33 == u8 and p39 then
+			u18 = u18 + 1;
+			if encrypt(u5, p16, u18) == p39 then
+				if v15.RecoveryTime <= tick() - u19 then
+					local v56 = 0;
+					for v57, v58 in pairs(v15.Hitboxes) do
+						if v58.Size == p38[v57] then
+							v56 = v56 + 1;
+						end;
+					end;
+					if #p38 <= v56 then
+						u20(p33, p34, p35, p36, p37);
+					else
+						u6.Health = 0;
+					end;
+				else
+					u6.Health = 0;
+				end;
+				u19 = tick();
+			end;
+		end;
+	end);
+	v17.Event:Connect(function(p40, p41, p42, p43)
+		u20(nil, p40, p41, p42, p43);
+	end);
+	local u21 = 28;
+	local function u22(p44, p45, p46, p47, p48)
+		if not u8 then
+			u17(nil, p45, p46, p47, p48);
+			return;
+		end;
+		if p44 ~= u8 then
+			justice(p44, u5);
+			return;
+		end;
+		u17(p44, p45, p46, p47, p48);
+	end;
+	p16.PlaySound.OnServerEvent:Connect(function(p49, p50, p51, p52, p53, p54)
+		if p50 ~= false then
+			u21 = u21 + 1;
+		end;
+		if encrypt(u5, p16, u21) == p54 then
+			u22(p49, p50, p51, p52, p53);
+		end;
+	end);
+	v18.Event:Connect(function(p55, p56, p57, p58)
+		u22(nil, p55, p56, p57, p58);
+	end);
+	if p16:FindFirstChild("KeyframeRemote") then
+		local v59 = p16:FindFirstChild("AI_Keyframe");
+		if v59 == nil then
+			v59 = Instance.new("BindableEvent", p16);
+			v59.Name = "AI_Keyframe";
+		end;
+		local function u23(p59)
+			if u4 == true then
+				for v60, v61 in pairs(v15.KeyframePoints) do
+					if v61.Name == p59 and (v61.FireServer == true or v61.ServerOnly == true) then
+						v61.Function(u5, p16);
+					end;
+				end;
+			end;
+		end;
+		local u24 = 0;
+		local function u25(p60, p61)
+			if not u8 then
+				u23(p61);
+				return;
+			end;
+			if p60 == u8 then
+				u23(p61);
+				return;
+			end;
+			justice(p60, u5);
+		end;
+		p16.KeyframeRemote.OnServerEvent:Connect(function(p62, p63, p64, p65)
+			if p62 == u8 and u4 == true and p65 then
+				u24 = u24 + 1;
+				if encrypt(u5, p16, u24) == p65 then
+					if p64 == true then
+						v15.KeyframeResetFunction(u5, p16);
+						return;
+					end;
+					u25(p62, p63);
+				end;
+			end;
+		end);
+		v59.Event:Connect(function(p66, p67)
+			if u4 == true then
+				if p67 ~= true then
+					u25(nil, p66);
+					return;
+				end;
+			else
+				return;
+			end;
+			v15.KeyframeResetFunction(u5, p16);
+		end);
+	end;
+	if p16:FindFirstChild("Special") then
+		local v62 = p16:FindFirstChild("AI_Special");
+		if v62 == nil then
+			v62 = Instance.new("BindableEvent", p16);
+			v62.Name = "AI_Special";
+		end;
+		local function u26(p68, p69, p70)
+			if u4 == true then
+				v15.SpecialEnabled = p70;
+				if v15.SpecialFunction then
+					v15.SpecialFunction(p68, p69, p70);
+				end;
+			end;
+		end;
+		local function u27(p71, p72, p73, p74)
+			if not u8 then
+				u26(p72, p73, p74);
+				return;
+			end;
+			if p71 ~= u8 then
+				justice(p71, u5);
+				return;
+			end;
+			u26(p72, p73, p74);
+		end;
+		p16.Special.OnServerEvent:Connect(function(p75, p76, p77, p78)
+			u27(p75, p76, p77, p78);
+		end);
+		v62.Event:Connect(function(p79, p80, p81)
+			u27(nil, p79, p80, p81);
+		end);
+	end;
+	local v63 = p16:FindFirstChild("AI_Attack");
+	if v63 == nil then
+		v63 = Instance.new("BindableEvent", p16);
+		v63.Name = "AI_Attack";
+	end;
+	local u28 = false;
+	local u29 = false;
+	local u30 = 0;
+	local u31 = nil;
+	v63.Event:Connect(function(p82)
+		if u6 then
+			if p82 == "Charge" then
+				if u28 == false and u12 == false and u6:GetAttribute("Stress") < 200 and u6.Health > 0 then
+					u28 = true;
+					u12 = true;
+					if u29 == true then
+						u29 = false;
+					end;
+					u30 = u30 + 1;
+					if u11 then
+						u11:Stop(0.25);
+					end;
+					if u4 == true then
+						u11 = u7:LoadAnimation(v15.ChargeAnimation);
+						u11:Play(0.2, 2, 1 + (1 - v15.ChargeTime));
+					end;
+					u31 = tick();
+					wait(v15.ChargeTime);
+					if u12 == true and u30 == u30 then
+						u11:AdjustSpeed(0);
+						return;
+					end;
+				end;
+			elseif p82 == "Attack" and u28 == true and u12 == true then
+				u12 = false;
+				local v64 = math.floor((tick() - u31) * 100) / 100 / v15.ChargeTime;
+				local v65 = 1 + (1 - v64);
+				if v64 > 1 then
+					v64 = 1;
+					v65 = 1;
+				elseif v64 < 0.4 then
+					if v64 <= 0 then
+						v64 = 0.025;
+					end;
+					v65 = 1.6;
+				end;
+				if u11 then
+					u11:Stop(0.25);
+				end;
+				if u4 == true then
+					game.ReplicatedStorage.Remotes.ClientDetect:FireAllClients(u5, v15.Hitboxes, v15.AttackTime / v65);
+					if v64 < 0.4 and v15.JabAnimations then
+						if u30 % 2 == 0 and v15.JabAnimations[2] then
+							u11 = u7:LoadAnimation(v15.JabAnimations[2]);
+						else
+							u11 = u7:LoadAnimation(v15.JabAnimations[1]);
+						end;
+					else
+						u11 = u7:LoadAnimation(v15.AttackAnimation);
+					end;
+					u11:Play(0.15, 3.5, v65);
+					v18:Fire(u5, v15.SwingSound, v65, v65);
+					local u32 = false;
+					local v66 = game.ReplicatedStorage.Remotes.ClientDetect.OnServerEvent:Connect(function(p83, p84, p85)
+						if p84 == u5 and u32 == false then
+							local v67 = p85.Humanoid:GetAttribute("Class");
+							if v67 then
+								if v15.Class == "Survivor" then
+									if v67 ~= "Survivor" and v67 ~= "Machine" then
+										u32 = true;
+										v17:Fire("Infected", v64, v65, p85);
+										return;
+									end;
+								elseif v67 == "Survivor" then
+									u32 = true;
+									v17:Fire("Survivor", v64, v65, p85);
+								end;
+							end;
+						end;
+					end);
+					for v68, v69 in pairs(v15.Hitboxes) do
+						table.insert(u13, (v69.Touched:Connect(function(p86)
+							if u32 == false and p86.Parent and (p86.Parent:FindFirstChild("Humanoid") and p86.Parent ~= u5 and p86.Name ~= "HumanoidRootPart" and p86.Parent.Humanoid.Health > 0) then
+								local v70 = p86.Parent.Humanoid:GetAttribute("Class");
+								if v70 then
+									if v15.Class == "Survivor" then
+										if v70 ~= "Survivor" and v70 ~= "Machine" then
+											u32 = true;
+											v17:Fire("Infected", v64, v65, p86.Parent);
+											return;
+										end;
+									elseif v70 == "Survivor" or v70 == "Machine" then
+										u32 = true;
+										v17:Fire("Survivor", v64, v65, p86.Parent);
+									end;
+								end;
+							end;
+						end)));
+					end;
+					wait(v15.AttackTime / v65);
+					if v66 then
+						v66:Disconnect();
+					end;
+					if #u13 > 0 then
+						for v71, v72 in pairs(u13) do
+							v72:Disconnect();
+						end;
+					end;
+				end;
+				wait(v15.RecoveryTime / v65);
+				wait(0.25);
+				u28 = false;
+			end;
+		end;
+	end);
+end;
+local l__UserInputService__33 = game:GetService("UserInputService");
+local l__ContextActionService__34 = game:GetService("ContextActionService");
+function v1.CreateLocalWeapon(p87, p88)
+	local l__LocalPlayer__73 = game.Players.LocalPlayer;
+	local v74 = false;
+	local v75 = require(p88:WaitForChild("WeaponInfo"));
+	local v76 = Enum.KeyCode.Q;
+	local l__AlternateKey__77 = v75.AlternateKey;
+	local u35 = false;
+	local u36 = false;
+	local u37 = 0;
+	local u38 = nil;
+	local u39 = nil;
+	local u40 = false;
+	local u41 = 0;
+	local u42 = nil;
+	local function u43()
+		if u35 == false and u36 == false then
+			u36 = true;
+			u37 = u37 + 1;
+			u38 = u39:LoadAnimation(v75.InspectAnimation);
+			u38:Play(0.25, 1);
+			if v75.KeyframePoints then
+				for v78, v79 in pairs(v75.KeyframePoints) do
+					u38:GetMarkerReachedSignal(v79.Name):Connect(function()
+						if u40 == true then
+							if v79.FireServer == true then
+								u41 = u41 + 1;
+								p88.KeyframeRemote:FireServer(v79.Name, false, encrypt(u42, p88, u41));
+							end;
+							if v79.ServerOnly == false or v79.ServerOnly == nil then
+								v79.Function(u42, p88);
+							end;
+						end;
+					end);
+				end;
+			end;
+			wait(u38.Length);
+			if u37 == u37 and u36 == true then
+				u36 = false;
+			end;
+		end;
+	end;
+	local l__MainUI__44 = l__LocalPlayer__73.PlayerGui:WaitForChild("MainUI", 3);
+	local u45 = nil;
+	local l__mouse__46 = l__LocalPlayer__73:GetMouse();
+	local u47 = false;
+	local u48 = nil;
+	local function u49()
+		if v75.KeyframeResetFunction and u40 == true then
+			if v75.ResetFireServer then
+				u41 = u41 + 1;
+				p88.KeyframeRemote:FireServer(nil, true, encrypt(u42, p88, u41));
+			end;
+			v75.KeyframeResetFunction(u42, p88, l__mouse__46.Hit.Position);
+		end;
+	end;
+	local u50 = 0;
+	local u51 = nil;
+	local function u52(p89)
+		for v80, v81 in pairs({ l__MainUI__44.MainFrame.GearChargeBar, l__MainUI__44.MainFrame.GearChargeBar.Bar }) do
+			if v81:IsA("Frame") and v81.BackgroundTransparency ~= p89 then
+				v81.BackgroundTransparency = 1 - p89;
+				u45 = game.TweenService:Create(v81, TweenInfo.new(0.25, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {
+					BackgroundTransparency = p89
+				}):Play();
+			end;
+		end;
+	end;
+	local u53 = 28;
+	local u54 = 0;
+	local u55 = {};
+	if l__UserInputService__33.GamepadEnabled == true then
+		v76 = Enum.KeyCode.ButtonR2;
+	end;
+	if l__UserInputService__33.TouchEnabled == true then
+		v74 = true;
+	end;
+	local function u56(p90, p91, p92)
+		if p91 == Enum.UserInputState.Begin then
+			u43();
+		end;
+	end;
+	local u57 = nil;
+	local u58 = nil;
+	local function u59(p93)
+		if l__LocalPlayer__73:FindFirstChild("Cursed") then
+			p93.Text = string.gsub(p93.Text, "r", "w");
+			p93.Text = string.gsub(p93.Text, "l", "w");
+			p93.Text = string.gsub(p93.Text, "R", "W");
+			p93.Text = string.gsub(p93.Text, "L", "W");
+		end;
+	end;
+	local u60 = 0;
+	local u61 = nil;
+	local u62 = nil;
+	local u63 = nil;
+	local u64 = nil;
+	local function u65()
+		if u35 == false and u47 == false and u48:GetAttribute("Stress") < 200 and u48:GetAttribute("YieldRagdoll") == false and u48.Health > 0 then
+			u35 = true;
+			u47 = true;
+			if u36 == true then
+				u36 = false;
+				u49();
+			end;
+			u50 = u50 + 1;
+			if u38 then
+				u38:Stop(0.25);
+			end;
+			if u40 == true then
+				u38 = u39:LoadAnimation(v75.ChargeAnimation);
+				u38:Play(0.2, 2, 1 + (1 - v75.ChargeTime));
+			end;
+			u51 = tick();
+			if u40 == true then
+				u52(0);
+				l__MainUI__44.MainFrame.GearChargeBar.Bar.Size = UDim2.new(0, 0, 1, 0);
+				l__MainUI__44.MainFrame.GearChargeBar.Bar.BackgroundColor3 = Color3.fromRGB(150, 150, 150);
+				u45 = game.TweenService:Create(l__MainUI__44.MainFrame.GearChargeBar.Bar, TweenInfo.new(v75.ChargeTime, Enum.EasingStyle.Sine, Enum.EasingDirection.In), {
+					Size = UDim2.new(1, 0, 1, 0)
+				});
+				u45:Play();
+			end;
+			wait(v75.ChargeTime);
+			if u47 == true and u50 == u50 then
+				u38:AdjustSpeed(0);
+				l__MainUI__44.MainFrame.GearChargeBar.Bar.BackgroundColor3 = Color3.fromRGB(0, 150, 0);
+			end;
+		end;
+	end;
+	local function u66()
+		if u35 == true and u47 == true and u48:GetAttribute("Stress") < 200 and u48:GetAttribute("YieldRagdoll") == false and u48.Health > 0 then
+			u47 = false;
+			local v82 = math.floor((tick() - u51) * 100) / 100 / v75.ChargeTime;
+			local v83 = 1 + (1 - v82);
+			if v82 > 1 then
+				v82 = 1;
+				v83 = 1;
+			elseif v82 < 0.4 then
+				l__MainUI__44.MainFrame.GearChargeBar.Bar.BackgroundColor3 = Color3.fromRGB(150, 0, 0);
+				v83 = 1.6;
+			end;
+			if u45 then
+				u45:Cancel();
+			end;
+			if u38 then
+				u38:Stop(0.25);
+			end;
+			if u40 == true then
+				if v82 < 0.4 and v75.JabAnimations then
+					if u50 % 2 == 0 and v75.JabAnimations[2] then
+						u38 = u39:LoadAnimation(v75.JabAnimations[2]);
+					else
+						u38 = u39:LoadAnimation(v75.JabAnimations[1]);
+					end;
+				else
+					u38 = u39:LoadAnimation(v75.AttackAnimation);
+				end;
+				u38:Play(0.15, 3.5, v83);
+				u53 = u53 + 1;
+				p88.PlaySound:FireServer(u42, v75.SwingSound, v83, v83);
+				local v84 = false;
+				local v85 = {};
+				for v86, v87 in pairs(v75.Hitboxes) do
+					table.insert(v85, v87.Size);
+					local u67 = v84;
+					table.insert(u55, (v87.Touched:Connect(function(p94)
+						if u67 == false and p94.Parent and (p94.Parent:FindFirstChild("Humanoid") and p94.Parent ~= u42 and p94.Name ~= "HumanoidRootPart" and p94.Parent.Humanoid.Health > 0) then
+							local v88 = p94.Parent.Humanoid:GetAttribute("Class");
+							if v88 then
+								if v75.Class == "Survivor" then
+									if v88 ~= "Survivor" and v88 ~= "Machine" then
+										u67 = true;
+										u54 = u54 + 1;
+										p88.Hit:FireServer("Infected", v82, v83, p94.Parent, v85, encrypt(u42, p88, u54));
+										return;
+									end;
+								elseif v88 == "Survivor" or v88 == "Machine" then
+									u67 = true;
+									u54 = u54 + 1;
+									p88.Hit:FireServer("Survivor", v82, v83, p94.Parent, v85, encrypt(u42, p88, u54));
+								end;
+							end;
+						end;
+					end)));
+				end;
+				wait(v75.AttackTime / v83);
+				if #u55 > 0 then
+					for v89, v90 in pairs(u55) do
+						v90:Disconnect();
+					end;
+				end;
+				u52(1);
+			end;
+			wait(v75.RecoveryTime / v83);
+			wait(0.25);
+			u35 = false;
+		end;
+	end;
+	p88.Equipped:Connect(function()
+		u40 = true;
+		u47 = false;
+		u36 = false;
+		u42 = p88.Parent;
+		u48 = u42:FindFirstChild("Humanoid");
+		u39 = u48:FindFirstChild("Animator");
+		if u39 == nil then
+			u39 = Instance.new("Animator", u48);
+		end;
+		u49();
+		l__ContextActionService__34:BindAction("Inspect", u56, false, v76);
+		if v74 == true then
+			l__MainUI__44.InspectButton.Visible = true;
+			u57 = l__MainUI__44.InspectButton.MouseButton1Down:Connect(function()
+				u43();
+			end);
+		end;
+		if v75.SpecialKey and v75.SpecialEnabled ~= nil then
+			local u68 = false;
+			if v74 == true then
+				l__MainUI__44.AlternateFunctionButton.Visible = true;
+				l__MainUI__44.AlternateFunctionButton.Text = v75.SpecialName;
+				u58 = l__MainUI__44.AlternateFunctionButton.MouseButton1Down:Connect(function()
+					if u68 == false then
+						u68 = true;
+						v75.SpecialEnabled = not v75.SpecialEnabled;
+						p88.Special:FireServer(u42, p88, v75.SpecialEnabled);
+						wait(0.35);
+						u68 = false;
+					end;
+				end);
+			end;
+			l__ContextActionService__34:BindAction("Special", function(p95, p96, p97)
+				if p96 == Enum.UserInputState.Begin and u68 == false then
+					u68 = true;
+					v75.SpecialEnabled = not v75.SpecialEnabled;
+					p88.Special:FireServer(u42, p88, v75.SpecialEnabled);
+					wait(0.35);
+					u68 = false;
+				end;
+			end, false, v75.SpecialKey);
+		end;
+		l__MainUI__44.MainFrame.GearInfo.Visible = true;
+		if v75.DamageType == 2 then
+			l__MainUI__44.MainFrame.GearInfo.DamageIcon.Image = "rbxassetid://7858913401";
+		else
+			l__MainUI__44.MainFrame.GearInfo.DamageIcon.Image = "rbxassetid://7858913017";
+		end;
+		l__MainUI__44.MainFrame.GearInfo.GearDamage.Text = v75.LowerDamage .. "-" .. v75.HigherDamage;
+		l__MainUI__44.MainFrame.GearInfo.GearName.Text = v75.Name;
+		l__MainUI__44.MainFrame.GearInfo.GearDescription.Text = v75.Description;
+		u59(l__MainUI__44.MainFrame.GearInfo.GearName);
+		u59(l__MainUI__44.MainFrame.GearInfo.GearDescription);
+		u60 = u60 + 1;
+		if u40 == true then
+			u61 = u39:LoadAnimation(v75.HoldAnimation);
+			u61:Play(0.25, 1);
+			u38 = u39:LoadAnimation(v75.EquipAnimation);
+			u38:Play(0.25, 2);
+			if v75.KeyframePoints then
+				for v91, v92 in pairs(v75.KeyframePoints) do
+					u38:GetMarkerReachedSignal(v92.Name):Connect(function()
+						if u40 == true then
+							if v92.FireServer == true then
+								u41 = u41 + 1;
+								p88.KeyframeRemote:FireServer(v92.Name, false, encrypt(u42, p88, u41));
+							end;
+							if v92.ServerOnly == false or v92.ServerOnly == nil then
+								v92.Function(u42, p88);
+							end;
+						end;
+					end);
+				end;
+			end;
+		end;
+		u62 = u48.Died:Connect(function()
+			u35 = true;
+			u40 = false;
+			l__MainUI__44.MainFrame.GearInfo.Visible = false;
+			if u61 then
+				u61:Stop(0.25);
+			end;
+			if u38 then
+				u38:Stop(0.25);
+			end;
+			if u47 == true then
+				u47 = false;
+				u52(1);
+			end;
+			if u63 then
+				u63:Disconnect();
+			end;
+			if u64 then
+				u64:Disconnect();
+			end;
+			if #u55 > 0 then
+				for v93, v94 in pairs(u55) do
+					v94:Disconnect();
+				end;
+			end;
+			if v74 == true then
+				l__MainUI__44.AttackButton.Visible = false;
+				l__MainUI__44.AlternateFunctionButton.Visible = false;
+				l__MainUI__44.InspectButton.Visible = false;
+				if u58 then
+					u58:Disconnect();
+				end;
+				if u57 then
+					u57:Disconnect();
+				end;
+			end;
+			l__ContextActionService__34:UnbindAction("Inspect");
+			l__ContextActionService__34:UnbindAction("Special");
+		end);
+		if v75.EquipTime then
+			wait(v75.EquipTime);
+		else
+			wait(0.5);
+		end;
+		if u60 == u60 and u40 == true then
+			if v74 ~= false then
+				l__MainUI__44.AttackButton.Visible = true;
+				u63 = l__MainUI__44.AttackButton.MouseButton1Down:Connect(function()
+					u65();
+				end);
+				u64 = l__MainUI__44.AttackButton.MouseButton1Up:Connect(function()
+					u66();
+				end);
+				return;
+			end;
+		else
+			return;
+		end;
+		u63 = l__mouse__46.Button1Down:Connect(function()
+			u65();
+		end);
+		u64 = l__mouse__46.Button1Up:Connect(function()
+			u66();
+		end);
+	end);
+	p88.Unequipped:Connect(function()
+		u40 = false;
+		u36 = false;
+		l__MainUI__44.MainFrame.GearInfo.Visible = false;
+		if u61 then
+			u61:Stop(0.25);
+		end;
+		if u38 then
+			u38:Stop(0.25);
+		end;
+		if u47 == true then
+			u47 = false;
+			u52(1);
+			wait(0.5);
+			u35 = false;
+		else
+			u35 = false;
+		end;
+		p88.PlaySound:FireServer(false);
+		if u63 then
+			u63:Disconnect();
+		end;
+		if u64 then
+			u64:Disconnect();
+		end;
+		if #u55 > 0 then
+			for v95, v96 in pairs(u55) do
+				v96:Disconnect();
+			end;
+		end;
+		if u62 then
+			u62:Disconnect();
+		end;
+		if v74 == true then
+			l__MainUI__44.AttackButton.Visible = false;
+			l__MainUI__44.AlternateFunctionButton.Visible = false;
+			l__MainUI__44.InspectButton.Visible = false;
+			if u58 then
+				u58:Disconnect();
+			end;
+			if u57 then
+				u57:Disconnect();
+			end;
+		end;
+		l__ContextActionService__34:UnbindAction("Inspect");
+		l__ContextActionService__34:UnbindAction("Special");
+	end);
+	p88.AncestryChanged:Connect(function()
+		if p88.Parent ~= u42 then
+			u52(1);
+		end;
+	end);
+end;
+return v1;
